@@ -1,17 +1,15 @@
-package com.nexova.survedgeapp.ui.base
+package com.nexova.survedgeapp.ui.base.activity
 
+import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.nexova.survedgeapp.ui.main.viewmodel.LocationViewModel
+import com.nexova.survedgeapp.ui.base.viewmodel.LocationViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -24,9 +22,9 @@ abstract class BaseActivity : AppCompatActivity() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         val fineLocationGranted =
-            permissions[android.Manifest.permission.ACCESS_FINE_LOCATION] ?: false
+            permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
         val coarseLocationGranted =
-            permissions[android.Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
+            permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
 
         if (fineLocationGranted || coarseLocationGranted) {
             checkLocationEnabled()
@@ -67,8 +65,8 @@ abstract class BaseActivity : AppCompatActivity() {
 
     protected fun checkLocationPermission() {
         if (!locationViewModel.checkLocationPermission(this)) {
-            if (shouldShowRequestPermissionRationale(android.Manifest.permission.ACCESS_FINE_LOCATION) ||
-                shouldShowRequestPermissionRationale(android.Manifest.permission.ACCESS_COARSE_LOCATION)
+            if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) ||
+                shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION)
             ) {
                 showPermissionRationale()
             } else {
@@ -100,8 +98,8 @@ abstract class BaseActivity : AppCompatActivity() {
     protected fun requestLocationPermission() {
         locationPermissionLauncher.launch(
             arrayOf(
-                android.Manifest.permission.ACCESS_FINE_LOCATION,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
             )
         )
     }
@@ -192,4 +190,3 @@ abstract class BaseActivity : AppCompatActivity() {
         return locationViewModel.checkLocationEnabled()
     }
 }
-

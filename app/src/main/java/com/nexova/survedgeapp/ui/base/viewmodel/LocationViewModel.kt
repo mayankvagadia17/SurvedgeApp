@@ -1,7 +1,9 @@
-package com.nexova.survedgeapp.ui.main.viewmodel
+package com.nexova.survedgeapp.ui.base.viewmodel
 
+import android.Manifest
 import android.app.Application
 import android.content.Context
+import android.content.pm.PackageManager
 import android.location.LocationManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -29,10 +31,10 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun checkLocationPermission(context: Context): Boolean {
-        val fineLocation = android.content.pm.PackageManager.PERMISSION_GRANTED ==
-                context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)
-        val coarseLocation = android.content.pm.PackageManager.PERMISSION_GRANTED ==
-                context.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION)
+        val fineLocation = PackageManager.PERMISSION_GRANTED ==
+                context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+        val coarseLocation = PackageManager.PERMISSION_GRANTED ==
+                context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
         
         val isGranted = fineLocation || coarseLocation
         _isPermissionGranted.value = isGranted

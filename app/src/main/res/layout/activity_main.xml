@@ -23,7 +23,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:itemIconTint="@color/bottom_bar_icon_tint"
-        app:itemBackground="@android:color/transparent"
+        app:itemActiveIndicatorStyle="@null"
         android:background="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
