@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/device"
+        android:title="Device"
+        android:icon="@drawable/ic_device"/>
+    <item
+        android:id="@+id/vector"
+        android:title="Vector"
+        android:icon="@drawable/ic_vector"/>
+</menu>
