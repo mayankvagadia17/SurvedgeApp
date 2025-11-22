@@ -161,23 +161,8 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     protected open fun onLocationPermissionDenied() {
-        // Show toast message
-        Toast.makeText(
-            this,
-            getLocationPermissionDeniedMessage(),
-            Toast.LENGTH_LONG
-        ).show()
-
-        // Re-request permission dialog after a short delay to ensure toast is visible
-        lifecycleScope.launch {
-            kotlinx.coroutines.delay(500) // Small delay to show toast first
-            requestLocationPermission()
-        }
     }
 
-    protected open fun getLocationPermissionDeniedMessage(): String {
-        return "Location permission is required for this app to function properly. Please grant location permission."
-    }
 
     protected open fun onLocationServiceEnabled() {
         // Override in child activities if needed
