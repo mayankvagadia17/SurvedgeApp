@@ -1,14 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.mapping.fragment.MappingFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <org.maplibre.android.maps.MapView
+        android:id="@+id/mapView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="match_parent" />
+
+    <!-- Zoom Controls -->
+    <LinearLayout
+        android:id="@+id/zoomControlsContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|top"
+        android:layout_margin="16dp"
+        android:orientation="vertical"
+        android:background="@drawable/zoom_controls_background"
+        android:elevation="4dp">
+
+        <ImageButton
+            android:id="@+id/btnZoomIn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Zoom In"
+            android:src="@android:drawable/ic_input_add"
+            android:scaleType="centerInside"
+            android:padding="12dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/neutral_dark"
+            android:alpha="0.3" />
+
+        <ImageButton
+            android:id="@+id/btnZoomOut"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Zoom Out"
+            android:src="@android:drawable/ic_input_delete"
+            android:scaleType="centerInside"
+            android:padding="12dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/neutral_dark"
+            android:alpha="0.3" />
+
+        <ImageButton
+            android:id="@+id/btnCenter"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Center Map"
+            android:src="@android:drawable/ic_menu_mylocation"
+            android:scaleType="centerInside"
+            android:padding="12dp" />
+    </LinearLayout>
+
+    <!-- Generate Points Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnGeneratePoints"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|bottom"
+        android:layout_margin="16dp"
+        android:text="Generate Points"
+        android:textColor="@color/white"
+        app:backgroundTint="@color/primary"
+        android:elevation="4dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp" />
 
 </FrameLayout>
