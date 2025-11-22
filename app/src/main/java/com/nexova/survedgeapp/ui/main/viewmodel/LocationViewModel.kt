@@ -21,9 +21,6 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     private val locationManager: LocationManager =
         application.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
-    /**
-     * Check if location services are enabled on the device
-     */
     fun checkLocationEnabled(): Boolean {
         val isEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
                 locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
@@ -31,9 +28,6 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
         return isEnabled
     }
 
-    /**
-     * Check if location permission is granted
-     */
     fun checkLocationPermission(context: Context): Boolean {
         val fineLocation = android.content.pm.PackageManager.PERMISSION_GRANTED ==
                 context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -45,9 +39,6 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
         return isGranted
     }
 
-    /**
-     * Update location enabled state
-     */
     fun updateLocationState(isEnabled: Boolean) {
         _isLocationEnabled.value = isEnabled
         if (!isEnabled) {
@@ -55,9 +46,6 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    /**
-     * Reset dialog state after showing
-     */
     fun resetDialogState() {
         _shouldShowLocationDialog.value = false
     }
