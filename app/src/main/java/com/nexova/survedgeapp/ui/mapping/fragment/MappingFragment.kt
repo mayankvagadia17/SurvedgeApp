@@ -278,13 +278,19 @@ class MappingFragment : Fragment(), OnMapReadyCallback {
                         )
                     )
                 } else {
-                    // Default center (Delhi area matching dummy points)
-                    map.easeCamera(
-                        CameraUpdateFactory.newLatLngZoom(
-                            LatLng(28.7041, 77.1025),
-                            13.0
+                    // Center on current location if available, otherwise use default
+                    val currentLocation = viewModel.currentLocation.value
+                    if (currentLocation != null) {
+                        centerOnLocation(currentLocation)
+                    } else {
+                        // Default center (Delhi area) if location is not available
+                        map.easeCamera(
+                            CameraUpdateFactory.newLatLngZoom(
+                                LatLng(28.7041, 77.1025),
+                                13.0
+                            )
                         )
-                    )
+                    }
                 }
             }
         }
