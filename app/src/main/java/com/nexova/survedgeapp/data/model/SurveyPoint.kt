@@ -11,7 +11,8 @@ data class SurveyPoint(
     val code: String = "",
     val latitude: Double,
     val longitude: Double,
-    val elevation: Double? = null
+    val elevation: Double? = null,
+    val isHighlighted: Boolean = false
 ) {
     /**
      * Convert to MapLibre Point for rendering

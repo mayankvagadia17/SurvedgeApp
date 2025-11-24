@@ -1,5 +1,11 @@
 package com.nexova.survedgeapp.ui.mapping.viewmodel
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -21,6 +27,12 @@ class MappingViewModel : ViewModel() {
 
     private val _isGeneratingPoints = MutableLiveData<Boolean>(false)
     val isGeneratingPoints: LiveData<Boolean> = _isGeneratingPoints
+
+    private val _currentLocation = MutableLiveData<Location?>(null)
+    val currentLocation: LiveData<Location?> = _currentLocation
+
+    private var locationManager: LocationManager? = null
+    private var locationListener: LocationListener? = null
 
     /**
      * Generate dummy points similar to the screenshot
@@ -146,6 +158,94 @@ class MappingViewModel : ViewModel() {
     }
     
     /**
+     * Generate N points randomly scattered and connect them
+     * Some points will be highlighted for better visibility
+     * Points are generated near the current device location
+     * @param numberOfPoints Number of points to generate (minimum 3)
+     */
+    fun generatePoints(numberOfPoints: Int) {
+        if (numberOfPoints < 3) {
+            return // Need at least 3 points to form a polygon
+        }
+        
+        viewModelScope.launch {
+            _isGeneratingPoints.value = true
+            withContext(Dispatchers.Default) {
+                val generatedPoints = mutableListOf<SurveyPoint>()
+                
+                // Get current location or use default (Delhi area)
+                val currentLocation = _currentLocation.value
+                val baseLat: Double
+                val baseLng: Double
+                
+                if (currentLocation != null) {
+                    // Use current location as base
+                    baseLat = currentLocation.latitude
+                    baseLng = currentLocation.longitude
+                    android.util.Log.d("MappingViewModel", "Generating points near current location: lat=$baseLat, lng=$baseLng")
+                } else {
+                    // Fallback to default location if current location is not available
+                    baseLat = 28.7041
+                    baseLng = 77.1025
+                    android.util.Log.d("MappingViewModel", "Current location not available, using default location: lat=$baseLat, lng=$baseLng")
+                }
+                
+                // Define area bounds for random distribution
+                // Using a larger area to ensure points are well spread and visible
+                val latRange = 0.0030  // ~330 meters north-south
+                val lngRange = 0.0030  // ~330 meters east-west
+                
+                // Use a seeded random for consistent results if needed, or system random for variety
+                val random = Random(System.currentTimeMillis())
+                
+                // Calculate how many points should be highlighted (approximately 30% of points)
+                val highlightCount = maxOf(1, (numberOfPoints * 0.3).toInt())
+                val highlightIndices = (0 until numberOfPoints).shuffled(random).take(highlightCount).toSet()
+                
+                // Generate points randomly scattered within the area
+                for (i in 0 until numberOfPoints) {
+                    // Generate random offset from base coordinates
+                    val latOffset = random.nextDouble(-latRange, latRange)
+                    val lngOffset = random.nextDouble(-lngRange, lngRange)
+                    
+                    val lat = baseLat + latOffset
+                    val lng = baseLng + lngOffset
+                    
+                    // Mark some points as highlighted
+                    val isHighlighted = highlightIndices.contains(i)
+                    
+                    generatedPoints.add(
+                        SurveyPoint(
+                            id = "P${i + 1}",
+                            name = "P${i + 1}",
+                            code = "BLD1",
+                            latitude = lat,
+                            longitude = lng,
+                            isHighlighted = isHighlighted
+                        )
+                    )
+                }
+                
+                // Create a line connecting all points in order (closed polygon)
+                // Points are connected in the order they were generated
+                val polygonLine = SurveyLine(
+                    id = "LINE_P1_P$numberOfPoints",
+                    name = "Polygon Line",
+                    code = "BLD1",
+                    points = generatedPoints,
+                    isClosed = true
+                )
+                
+                withContext(Dispatchers.Main) {
+                    _points.value = generatedPoints
+                    _lines.value = listOf(polygonLine)
+                    _isGeneratingPoints.value = false
+                }
+            }
+        }
+    }
+    
+    /**
      * Clear all points and lines
      */
     fun clearAll() {
@@ -169,5 +269,113 @@ class MappingViewModel : ViewModel() {
         val currentPoints = _points.value?.toMutableList() ?: mutableListOf()
         currentPoints.removeAll { it.id == pointId }
         _points.value = currentPoints
+    }
+
+    /**
+     * Start tracking device location
+     */
+    fun startLocationTracking(context: Context) {
+        if (locationManager != null) {
+            android.util.Log.d("MappingViewModel", "Location tracking already started")
+            return // Already tracking
+        }
+
+        locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        // Check if location permission is granted
+        val hasPermission = context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
+        if (!hasPermission) {
+            android.util.Log.w("MappingViewModel", "Location permission not granted")
+            return
+        }
+
+        // Check if location services are enabled
+        val isGpsEnabled = locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) ?: false
+        val isNetworkEnabled = locationManager?.isProviderEnabled(LocationManager.NETWORK_PROVIDER) ?: false
+        
+        if (!isGpsEnabled && !isNetworkEnabled) {
+            android.util.Log.w("MappingViewModel", "Location services not enabled")
+            return
+        }
+
+        android.util.Log.d("MappingViewModel", "Starting location tracking...")
+
+        locationListener = object : LocationListener {
+            override fun onLocationChanged(location: Location) {
+                android.util.Log.d("MappingViewModel", "Location updated: lat=${location.latitude}, lng=${location.longitude}")
+                _currentLocation.postValue(location)
+            }
+
+            override fun onProviderEnabled(provider: String) {
+                android.util.Log.d("MappingViewModel", "Provider enabled: $provider")
+            }
+            
+            override fun onProviderDisabled(provider: String) {
+                android.util.Log.d("MappingViewModel", "Provider disabled: $provider")
+            }
+        }
+
+        try {
+            // Try to get last known location first
+            val lastKnownLocation = if (isGpsEnabled) {
+                locationManager?.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            } else null
+                ?: if (isNetworkEnabled) {
+                    locationManager?.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+                } else null
+                
+            if (lastKnownLocation != null) {
+                android.util.Log.d("MappingViewModel", "Using last known location: lat=${lastKnownLocation.latitude}, lng=${lastKnownLocation.longitude}")
+                _currentLocation.postValue(lastKnownLocation)
+            } else {
+                android.util.Log.d("MappingViewModel", "No last known location available")
+            }
+
+            // Request location updates
+            if (isGpsEnabled) {
+                locationManager?.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    1000L, // Update every 1 second
+                    5f, // Update if moved 5 meters
+                    locationListener!!
+                )
+                android.util.Log.d("MappingViewModel", "Requested GPS location updates")
+            }
+            
+            if (isNetworkEnabled) {
+                locationManager?.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER,
+                    1000L, // Update every 1 second
+                    5f, // Update if moved 5 meters
+                    locationListener!!
+                )
+                android.util.Log.d("MappingViewModel", "Requested Network location updates")
+            }
+        } catch (e: SecurityException) {
+            // Permission not granted
+            android.util.Log.e("MappingViewModel", "SecurityException: Permission not granted", e)
+            e.printStackTrace()
+        } catch (e: Exception) {
+            android.util.Log.e("MappingViewModel", "Error starting location tracking", e)
+            e.printStackTrace()
+        }
+    }
+
+    /**
+     * Stop tracking device location
+     */
+    fun stopLocationTracking() {
+        locationListener?.let { listener ->
+            locationManager?.removeUpdates(listener)
+        }
+        locationListener = null
+        locationManager = null
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        stopLocationTracking()
     }
 }

@@ -43,10 +43,10 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Zoom Out"
             android:src="@android:drawable/ic_input_delete"
             android:scaleType="centerInside"
-            android:padding="12dp" />
+            android:padding="12dp"
+            app:tint="@color/primary" />
 
         <View
             android:layout_width="match_parent"
