@@ -56,6 +56,11 @@ dependencies {
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
-    implementation(libs.android.sdk)
+    // osmdroid for OpenStreetMap
+    implementation(libs.osmdroid.android)
+    
+    // Coroutines for background processing
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.core)
 
 }

@@ -1,6 +1,6 @@
 package com.nexova.survedgeapp.data.model
 
-import org.maplibre.geojson.LineString
+import org.osmdroid.util.GeoPoint
 
 /**
  * Represents a survey line connecting multiple points
@@ -13,17 +13,16 @@ data class SurveyLine(
     val isClosed: Boolean = false
 ) {
     /**
-     * Convert to MapLibre LineString for rendering
+     * Convert to osmdroid GeoPoint list for rendering
      */
-    fun toMapLibreLineString(): LineString {
-        val coordinates = points.map { it.toMapLibrePoint() }
+    fun toGeoPoints(): List<GeoPoint> {
+        val geoPoints = points.map { it.toGeoPoint() }
         // If closed, add first point at the end
-        val finalCoordinates = if (isClosed && coordinates.isNotEmpty()) {
-            coordinates + coordinates.first()
+        return if (isClosed && geoPoints.isNotEmpty()) {
+            geoPoints + geoPoints.first()
         } else {
-            coordinates
+            geoPoints
         }
-        return LineString.fromLngLats(finalCoordinates)
     }
 }
 

@@ -1,6 +1,6 @@
 package com.nexova.survedgeapp.data.model
 
-import org.maplibre.geojson.Point
+import org.osmdroid.util.GeoPoint
 
 /**
  * Represents a survey point with coordinates and metadata
@@ -15,10 +15,10 @@ data class SurveyPoint(
     val isHighlighted: Boolean = false
 ) {
     /**
-     * Convert to MapLibre Point for rendering
+     * Convert to osmdroid GeoPoint for rendering
      */
-    fun toMapLibrePoint(): Point {
-        return Point.fromLngLat(longitude, latitude)
+    fun toGeoPoint(): GeoPoint {
+        return GeoPoint(latitude, longitude)
     }
 }
 
